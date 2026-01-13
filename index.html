@@ -22,7 +22,7 @@
   <section class="hero">
     <h2>Prepare Smarter, Not Harder</h2>
     <p>Access previous years’ papers and generate predicted mock tests instantly.</p>
-    <button onclick="showAlert()">Get Started</button>
+    <button onclick="document.getElementById('signupForm').scrollIntoView()">Get Started</button>
   </section>
 
   <!-- Features -->
@@ -41,11 +41,47 @@
     </div>
   </section>
 
+  <!-- Signup Form -->
+  <section id="signupForm" class="form-section">
+    <h2>Sign Up for Updates</h2>
+    <form id="contactForm">
+      <input type="text" name="name" placeholder="Your Name" required />
+      <input type="email" name="email" placeholder="Your Email" required />
+      <button type="submit">Submit</button>
+    </form>
+    <p id="responseMessage"></p>
+  </section>
+
   <!-- Footer -->
   <footer>
     <p>© 2026 ExamPredictor. All rights reserved.</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    document.getElementById("contactForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = {
+        name: e.target.name.value,
+        email: e.target.email.value
+      };
+
+      try {
+        const response = await fetch("https://shreyas-m.app.n8n.cloud/webhook/a433dc9e-3816-48b1-b39d-4f50f8537d3c/webhook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          document.getElementById("responseMessage").innerText = "✅ Successfully submitted!";
+        } else {
+          document.getElementById("responseMessage").innerText = "❌ Submission failed.";
+        }
+      } catch (error) {
+        document.getElementById("responseMessage").innerText = "⚠️ Error connecting to server.";
+      }
+    });
+  </script>
 </body>
 </html>
+
