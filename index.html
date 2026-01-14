@@ -5,9 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ExamPredictor</title>
   <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* Simple styling for the result area */
+    #result-container {
+      margin: 20px auto;
+      padding: 15px;
+      max-width: 600px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      display: none; /* Hidden by default */
+      text-align: left;
+    }
+    .loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-  <!-- Navbar -->
   <header>
     <nav class="navbar">
       <h1 class="logo">ExamPredictor</h1>
@@ -18,32 +34,89 @@
     </nav>
   </header>
 
-  <!-- Hero Section -->
   <section class="hero">
     <h2>Prepare Smarter, Not Harder</h2>
     <p>Access previous years’ papers and generate predicted mock tests instantly.</p>
     <button onclick="showAlert()">Get Started</button>
   </section>
 
-  <!-- Features as Buttons -->
   <section id="features" class="features">
+    
     <button class="feature-btn" onclick="window.location.href='https://shreyas-m.app.n8n.cloud/webhook-test/question-paper-api'">
       📚 Previous Papers
     </button>
-    <!-- Updated Predicted Papers button -->
-    <button class="feature-btn" onclick="window.location.href='https://shreyas-m.app.n8n.cloud/webhook-test/predicted-papers'">
+    
+    <button id="btn-predict" class="feature-btn" onclick="getPredictedPapers()">
       🤖 Predicted Papers
     </button>
+    
     <button class="feature-btn" onclick="window.location.href='https://shreyas-m.app.n8n.cloud/webhook-test/custom-mock-test'">
       📝 Custom Mock Tests
     </button>
+
   </section>
 
-  <!-- Footer -->
+  <div id="result-container">
+    <h3>Generated Papers:</h3>
+    <pre id="output-text">Waiting for data...</pre>
+  </div>
+
   <footer>
     <p>© 2026 ExamPredictor. All rights reserved.</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    // Existing function
+    function showAlert() {
+      alert("Welcome to ExamPredictor! Let's get started.");
+    }
+
+    // NEW: Function to handle the n8n request
+    async function getPredictedPapers() {
+      const button = document.getElementById('btn-predict');
+      const resultContainer = document.getElementById('result-container');
+      const outputText = document.getElementById('output-text');
+      const n8nUrl = 'https://shreyas-m.app.n8n.cloud/webhook-test/predicted-papers';
+
+      // 1. UI: Show Loading State
+      button.innerText = "⏳ Generating...";
+      button.classList.add('loading');
+      button.disabled = true; // Prevent double clicking
+      resultContainer.style.display = 'none';
+
+      try {
+        // 2. Network: Send request and WAIT for response
+        const response = await fetch(n8nUrl, {
+          method: 'GET', // Or 'POST' if your webhook expects data
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        // 3. Data: Parse the response
+        // Use .json() if n8n returns JSON, or .text() if it returns plain text/HTML
+        const data = await response.json(); 
+
+        // 4. UI: Update with results
+        resultContainer.style.display = 'block';
+        
+        // Pretty print JSON or just show text
+        outputText.innerText = JSON.stringify(data, null, 2); 
+
+      } catch (error) {
+        console.error('Error:', error);
+        alert("Failed to get papers from n8n. Check console for details.");
+      } finally {
+        // 5. Cleanup: Reset button state
+        button.innerText = "🤖 Predicted Papers";
+        button.classList.remove('loading');
+        button.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html>
